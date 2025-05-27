@@ -56,6 +56,9 @@ dependencies {
     implementation(libs.litert.support)
     implementation(libs.litert.metadata)
 
+    //genai
+    implementation(libs.tasks.genai)
+
     //hilt
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
@@ -76,6 +79,9 @@ dependencies {
 
     //coil
     implementation(libs.coil.compose)
+
+    //workers
+    implementation(libs.androidx.work.runtime.ktx)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

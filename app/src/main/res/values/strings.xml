@@ -3,4 +3,5 @@
     <string name="expected_label">Expected label:</string>
     <string name="classified_label">Classified label:</string>
     <string name="caption_label">Generated Image caption</string>
+    <string name="gemma_3_1b_it_cpu_generated_description">%s generated description</string>
 </resources>

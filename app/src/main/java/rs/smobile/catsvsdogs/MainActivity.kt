@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -47,6 +50,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
         setContent {
             val viewModel: MainViewModel = hiltViewModel()
@@ -54,6 +58,8 @@ class MainActivity : ComponentActivity() {
             val expectedLabel by viewModel.expectedLabel.collectAsStateWithLifecycle()
             val classifiedLabel by viewModel.classifiedLabel.collectAsStateWithLifecycle()
             val generatedCaption by viewModel.generatedCaption.collectAsStateWithLifecycle()
+            val generatedDescription by viewModel.generatedDescription.collectAsStateWithLifecycle()
+            val generatedDescriptionIsLoading by viewModel.generatedDescriptionIsLoading.collectAsStateWithLifecycle()
 
             val context = LocalContext.current
             val imageLoader = context.imageLoader
@@ -69,6 +75,7 @@ class MainActivity : ComponentActivity() {
                     .target { drawable ->
                         (drawable as? BitmapDrawable)?.bitmap?.let {
                             viewModel.inferImageClass(it)
+                            viewModel.generateCaptionForImage(it)
                         }
                     }
                     .build()
@@ -81,6 +88,9 @@ class MainActivity : ComponentActivity() {
                     expectedLabel = expectedLabel,
                     classifiedLabel = classifiedLabel,
                     generatedCaption = generatedCaption,
+                    llmName = viewModel.getLlmName(),
+                    generatedDescription = generatedDescription,
+                    generatedDescriptionIsLoading = generatedDescriptionIsLoading,
                     onShowImage = viewModel::loadRandomImage,
                 )
             }
@@ -95,13 +105,16 @@ private fun MainScreen(
     expectedLabel: String,
     classifiedLabel: String,
     generatedCaption: String,
+    llmName: String,
+    generatedDescription: String,
+    generatedDescriptionIsLoading: Boolean,
     onShowImage: () -> Unit,
 ) {
     Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
         Column(
             modifier = modifier
                 .padding(innerPadding)
-                .padding(top = 24.dp)
+                .padding(top = 16.dp)
                 .padding(horizontal = 24.dp)
         ) {
             Row(
@@ -110,13 +123,13 @@ private fun MainScreen(
             ) {
                 Text(
                     text = stringResource(R.string.expected_label),
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    style = MaterialTheme.typography.headlineMedium
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     text = expectedLabel,
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -127,13 +140,13 @@ private fun MainScreen(
             ) {
                 Text(
                     text = stringResource(R.string.classified_label),
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    style = MaterialTheme.typography.headlineMedium
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge
                 )
                 Text(
                     text = classifiedLabel.capitalize(),
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    style = MaterialTheme.typography.headlineMedium,
+                    modifier = Modifier.padding(vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.tertiary
                 )
@@ -142,23 +155,47 @@ private fun MainScreen(
                 image = image,
                 onShowImage = onShowImage
             )
-            Row(
+            Text(
+                text = stringResource(R.string.caption_label),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 16.dp),
-            ) {
-                Text(
-                    text = stringResource(R.string.caption_label),
-                    style = MaterialTheme.typography.headlineMedium
-                )
-            }
+                style = MaterialTheme.typography.bodyLarge
+            )
             Text(
                 text = generatedCaption.capitalize(),
                 modifier = Modifier.padding(vertical = 8.dp),
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary
             )
+            Text(
+                text = stringResource(R.string.gemma_3_1b_it_cpu_generated_description, llmName),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp),
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold
+            )
+            Card(
+                modifier = Modifier.padding(vertical = 4.dp),
+                shape = RoundedCornerShape(4.dp),
+            ) {
+                Box(Modifier.fillMaxSize()) {
+                    Text(
+                        text = generatedDescription,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    if (generatedDescriptionIsLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .size(20.dp)
+                                .align(Alignment.Center)
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -176,7 +213,6 @@ private fun ImageBox(
     ) {
         Card(
             modifier = Modifier
-                .fillMaxWidth()
                 .aspectRatio(1f)
         ) {
             AsyncImage(
@@ -203,6 +239,9 @@ private fun GreetingPreview() {
             expectedLabel = "Cat",
             classifiedLabel = "dog",
             generatedCaption = "A cute cat is laying on her stomach",
+            llmName = "Gemma 3",
+            generatedDescription = "This is generated description",
+            generatedDescriptionIsLoading = true,
         ) { }
     }
 }
