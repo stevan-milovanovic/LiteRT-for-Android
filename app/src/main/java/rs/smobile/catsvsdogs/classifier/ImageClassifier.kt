@@ -38,15 +38,6 @@ class ImageClassifier @Inject constructor(
     private var interpreter: Interpreter
     private var labelList: List<String>
 
-
-    data class Recognition(
-        var id: String = "",
-        var title: String = "",
-        var confidence: Float = 0F,
-    ) {
-        override fun toString(): String = "Title = $title, Confidence = $confidence"
-    }
-
     init {
         val options = Interpreter.Options().apply {
             numThreads = NUM_OF_THREADS
@@ -119,7 +110,7 @@ class ImageClassifier @Inject constructor(
             }
         }
 
-        val recognitions = ArrayList<Recognition>()
+        val recognitions = mutableListOf<Recognition>()
         val recognitionsSize = min(pq.size, MAX_NUM_OF_RESULTS)
         (0 until recognitionsSize).forEach { i ->
             pq.poll()?.let {

@@ -1,11 +1,9 @@
 package rs.smobile.catsvsdogs.di
 
-import android.content.Context
 import android.content.res.AssetManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import rs.smobile.catsvsdogs.captioner.ImageCaptioner
 import rs.smobile.catsvsdogs.captioner.ImageCaptionerVocabulary
