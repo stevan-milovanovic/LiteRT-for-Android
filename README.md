@@ -1,18 +1,19 @@
 # Image Classification & Image Captioning with LiteRT
 
 
-This is a fully functional Android application built with Kotlin and Jetpack Compose, demonstrating how to use a LiteRT models for on-device image classification and image captioning. The project follows modern Android development and design best practices, and serves as a practical reference for developers looking to integrate LiteRT into their own apps.
+This is a fully functional Android application built with Kotlin and Jetpack Compose that showcases how to integrate LiteRT for on-device image classification and image captioning. It also demonstrates how to use MediaPipe for on-device large language model (LLM) integration, enabling natural language processing directly on the device.
 
+The project follows modern Android development best practices and serves as a practical reference for developers interested in integrating LiteRT and MediaPipe into their own apps.
 
 <p>
-    <img src="cat_on_a_chair_in_a_room.png" width="270" height="606">
-    <img src="dog_out_of_a_window.png" width="270" height="606">
-    <img src="cat_on_a_rock.png" width="270" height="606">
+    <img src="Screenshot_20250528_001631.png" width="270" height="606">
+    <img src="Screenshot_20250528_001013.png" width="270" height="606">
+    <img src="Screenshot_20250528_001037.png" width="270" height="606">
 </p>
 <p>
-    <img src="cat_in_bathroom_sink.png" width="270" height="606">
-    <img src="brown_dog_laying_on_a_green_field.png" width="270" height="606">
-    <img src="cat_is_looking_out_of_a_window.png" width="270" height="606">
+    <img src="Screenshot_20250527_225229.png" width="270" height="606">
+    <img src="Screenshot_20250528_000539.png" width="270" height="606">
+    <img src="Screenshot_20250528_000058.png" width="270" height="606">
 </p>
 <div align="center">
     
@@ -21,10 +22,12 @@ This is a fully functional Android application built with Kotlin and Jetpack Com
 ## Features
 * Image Classification
 * Image Captioning
+* LLM Inference
 
 ### Libraries
 
 * [LiteRT][litert]
+* [LLM Inference][genai]
 * [Jetpack Core][core]
 * [MVVM architectural pattern][mvvm]
 * [Dependency injection with Hilt][hilt]
@@ -34,6 +37,8 @@ This is a fully functional Android application built with Kotlin and Jetpack Com
 * [Coil][coil] for image loading
 
 [litert]: https://github.com/google-ai-edge/LiteRT
+
+[genai]: https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android
 
 [core]: https://developer.android.com/jetpack/androidx/releases/core
 
