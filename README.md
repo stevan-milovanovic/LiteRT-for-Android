@@ -12,7 +12,6 @@ The project follows modern Android development best practices and serves as a pr
     <img src="Screenshot_20250528_135943.png" width="115" height="258">
     <img src="Screenshot_20250528_140520.png" width="115" height="258">
     <img src="Screenshot_20250528_141940.png" width="115" height="258">
-    <img src="Screenshot_20250528_140726.png" width="115" height="258">
 </p>
 <div align="center">
     
