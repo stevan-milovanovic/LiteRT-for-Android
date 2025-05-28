@@ -6,14 +6,13 @@ This is a fully functional Android application built with Kotlin and Jetpack Com
 The project follows modern Android development best practices and serves as a practical reference for developers interested in integrating LiteRT and MediaPipe into their own apps.
 
 <p>
-    <img src="Screenshot_20250528_001631.png" width="270" height="606">
-    <img src="Screenshot_20250528_001013.png" width="270" height="606">
-    <img src="Screenshot_20250528_001037.png" width="270" height="606">
-</p>
-<p>
-    <img src="Screenshot_20250527_225229.png" width="270" height="606">
-    <img src="Screenshot_20250528_000539.png" width="270" height="606">
-    <img src="Screenshot_20250528_000058.png" width="270" height="606">
+    <img src="Screenshot_20250528_135718.png" width="115" height="258">
+    <img src="Screenshot_20250528_141803.png" width="115" height="258">
+    <img src="Screenshot_20250528_172115.png" width="115" height="258">
+    <img src="Screenshot_20250528_135943.png" width="115" height="258">
+    <img src="Screenshot_20250528_140520.png" width="115" height="258">
+    <img src="Screenshot_20250528_141940.png" width="115" height="258">
+    <img src="Screenshot_20250528_140726.png" width="115" height="258">
 </p>
 <div align="center">
     
