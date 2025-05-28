@@ -52,10 +52,10 @@ class MainViewModel @Inject constructor(
             _generatedDescription.value = ""
 
             _image.value = if (Random.Default.nextBoolean()) {
-                _expectedLabel.value = "Dog"
+                _expectedLabel.value = imageClassifier.labels.last()
                 dogImageRepository.getRandomImage()
             } else {
-                _expectedLabel.value = "Cat"
+                _expectedLabel.value = imageClassifier.labels.first()
                 catImageRepository.getRandomImage()
             }
         }
@@ -71,7 +71,7 @@ class MainViewModel @Inject constructor(
         generateImageDescription(generatedCaption)
     }
 
-    fun generateImageDescription(generatedCaption: String) {
+    private fun generateImageDescription(generatedCaption: String) {
         val question = "Describe image: $generatedCaption in maximum two sentences. " +
                 "Skip intro as 'Here's a description and caption for the image'. " +
                 "Give description right away."

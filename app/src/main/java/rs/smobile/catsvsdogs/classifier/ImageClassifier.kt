@@ -35,8 +35,8 @@ class ImageClassifier @Inject constructor(
         private const val OUTPUT_TENSORS_COUNT = 1
     }
 
-    private var interpreter: Interpreter
-    private var labelList: List<String>
+    private val interpreter: Interpreter
+    val labels: List<String>
 
     init {
         val options = Interpreter.Options().apply {
@@ -44,13 +44,8 @@ class ImageClassifier @Inject constructor(
             useNNAPI = true
         }
         interpreter = Interpreter(assetManager.loadModelFile(modelPath), options)
-        labelList = loadLabelList(assetManager, labelPath)
+        labels = loadLabels(assetManager, labelPath)
     }
-
-    private fun loadLabelList(
-        assetManager: AssetManager,
-        labelPath: String,
-    ): List<String> = assetManager.open(labelPath).bufferedReader().useLines { it.toList() }
 
     /**
      * Returns the result after running the recognition with the help of interpreter
@@ -59,7 +54,7 @@ class ImageClassifier @Inject constructor(
     fun recognizeImage(bitmap: Bitmap): List<Recognition> {
         val scaledBitmap = bitmap.scale(inputSize, inputSize, false)
         val byteBuffer = convertBitmapToByteBuffer(scaledBitmap)
-        val result = Array(OUTPUT_TENSORS_COUNT) { FloatArray(labelList.size) }
+        val result = Array(OUTPUT_TENSORS_COUNT) { FloatArray(labels.size) }
         interpreter.run(byteBuffer, result)
         return getSortedResult(result)
     }
@@ -103,14 +98,14 @@ class ImageClassifier @Inject constructor(
                 confidence1.compareTo(confidence2) * -1
             })
 
-        for (i in labelList.indices) {
+        for (i in labels.indices) {
             val confidence = probabilities[0][i]
             if (confidence >= CONFIDENCE_THRESHOLD) {
-                pq.add(Recognition(i.toString(), labelList[i], confidence))
+                pq.add(Recognition(i.toString(), labels[i], confidence))
             }
         }
 
-        val recognitions = mutableListOf<Recognition>()
+        val recognitions = arrayListOf<Recognition>()
         val recognitionsSize = min(pq.size, MAX_NUM_OF_RESULTS)
         (0 until recognitionsSize).forEach { i ->
             pq.poll()?.let {
@@ -119,5 +114,10 @@ class ImageClassifier @Inject constructor(
         }
         return recognitions
     }
+
+    private fun loadLabels(
+        assetManager: AssetManager,
+        labelPath: String,
+    ): List<String> = assetManager.open(labelPath).bufferedReader().useLines { it.toList() }
 
 }

@@ -23,16 +23,16 @@ class ImageCaptioner @Inject constructor(
         private const val LSTM_STATE_SIZE = 1024
     }
 
-    private var interpreter: Interpreter
-    private var lstmInterpreter: Interpreter
+    private val interpreter: Interpreter
+    private val lstmInterpreter: Interpreter
 
-    private var imageFeed = Array(inputSize) { Array(inputSize) { FloatArray(3) } }
-    private var inputFeed = Array(1) { LongArray(1) }
-    private var stateFeed = Array(1) { FloatArray(LSTM_STATE_SIZE) }
+    private val imageFeed = Array(inputSize) { Array(inputSize) { FloatArray(3) } }
+    private val inputFeed = Array(1) { LongArray(1) }
+    private val stateFeed = Array(1) { FloatArray(LSTM_STATE_SIZE) }
 
-    private var softmax = Array(1) { FloatArray(VOCABULARY_SIZE) }
-    private var lstmState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
-    private var initialState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
+    private val softmax = Array(1) { FloatArray(VOCABULARY_SIZE) }
+    private val lstmState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
+    private val initialState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
 
     init {
         val options = Interpreter.Options().apply {
