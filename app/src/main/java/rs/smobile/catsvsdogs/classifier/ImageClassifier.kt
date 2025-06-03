@@ -4,6 +4,9 @@ import android.content.res.AssetManager
 import android.graphics.Bitmap
 import androidx.core.graphics.scale
 import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.InterpreterApi
+import org.tensorflow.lite.nnapi.NnApiDelegate
+import org.tensorflow.lite.nnapi.NnApiDelegateImpl
 import rs.smobile.catsvsdogs.loadModelFile
 import java.nio.ByteBuffer
 import java.nio.ByteBuffer.allocateDirect
@@ -35,15 +38,17 @@ class ImageClassifier @Inject constructor(
         private const val OUTPUT_TENSORS_COUNT = 1
     }
 
-    private val interpreter: Interpreter
+    private val interpreterApi: InterpreterApi
     val labels: List<String>
 
     init {
         val options = Interpreter.Options().apply {
             numThreads = NUM_OF_THREADS
             useNNAPI = true
+            val nnApiDelegate = NnApiDelegate.Options().apply { useNnapiCpu = true }
+            addDelegate(NnApiDelegateImpl(nnApiDelegate))
         }
-        interpreter = Interpreter(assetManager.loadModelFile(modelPath), options)
+        interpreterApi = InterpreterApi.create(assetManager.loadModelFile(modelPath), options)
         labels = loadLabels(assetManager, labelPath)
     }
 
@@ -55,7 +60,7 @@ class ImageClassifier @Inject constructor(
         val scaledBitmap = bitmap.scale(inputSize, inputSize, false)
         val byteBuffer = convertBitmapToByteBuffer(scaledBitmap)
         val result = Array(OUTPUT_TENSORS_COUNT) { FloatArray(labels.size) }
-        interpreter.run(byteBuffer, result)
+        interpreterApi.run(byteBuffer, result)
         return getSortedResult(result)
     }
 
