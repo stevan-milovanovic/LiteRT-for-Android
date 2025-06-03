@@ -23,33 +23,22 @@ class ImageCaptioner @Inject constructor(
         private const val LSTM_STATE_SIZE = 1024
     }
 
-    private val interpreter: Interpreter
-    private val lstmInterpreter: Interpreter
-
-    private val imageFeed = Array(inputSize) { Array(inputSize) { FloatArray(3) } }
-    private val inputFeed = Array(1) { LongArray(1) }
-    private val stateFeed = Array(1) { FloatArray(LSTM_STATE_SIZE) }
-
-    private val softmax = Array(1) { FloatArray(VOCABULARY_SIZE) }
-    private val lstmState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
-    private val initialState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
-
-    init {
-        val options = Interpreter.Options().apply {
-            numThreads = NUM_OF_THREADS
-            useNNAPI = true
-        }
-        interpreter = Interpreter(assetManager.loadModelFile(modelPath), options)
-        lstmInterpreter = Interpreter(assetManager.loadModelFile(lstmModelPath), options)
+    private val options = Interpreter.Options().apply {
+        numThreads = NUM_OF_THREADS
+        useNNAPI = true
     }
+    private val cnnInterpreter = Interpreter(assetManager.loadModelFile(modelPath), options)
+    private val lstmInterpreter = Interpreter(assetManager.loadModelFile(lstmModelPath), options)
 
     fun generateCaption(bitmap: Bitmap): String {
-        preprocessImage(bitmap)
-        return runInference()
+        val imageFeed = preprocessImage(bitmap)
+        val stateFeed = runCNNInference(imageFeed)
+        return generateCaptionText(stateFeed)
     }
 
-    private fun preprocessImage(bitmap: Bitmap) {
+    private fun preprocessImage(bitmap: Bitmap): Array<Array<FloatArray>> {
         val scaledBitmap = bitmap.scale(inputSize, inputSize, false)
+        val imageFeed = Array(inputSize) { Array(inputSize) { FloatArray(3) } }
         for (i in 0 until inputSize) {
             for (j in 0 until inputSize) {
                 val pixelValue = scaledBitmap[i, j]
@@ -58,42 +47,36 @@ class ImageCaptioner @Inject constructor(
                 imageFeed[i][j][2] = (pixelValue and 0xFF) / IMAGE_STD
             }
         }
+        return imageFeed
     }
 
-    private fun runInference(): String {
-        // Run CNN to get initial state
-        val outputsCnn = HashMap<Int, Any>().apply {
-            put(interpreter.getOutputIndex("import/lstm/initial_state"), initialState)
-        }
-        interpreter.runForMultipleInputsOutputs(arrayOf(imageFeed), outputsCnn)
-        System.arraycopy(initialState[0], 0, stateFeed[0], 0, initialState[0].size)
-
-        // Setup LSTM outputs
-        val outputsLstm = HashMap<Int, Any>().apply {
-            put(lstmInterpreter.getOutputIndex("import/softmax"), softmax)
-            put(lstmInterpreter.getOutputIndex("import/lstm/state"), lstmState)
-        }
-
-        return generateCaptionText(outputsLstm)
+    private fun runCNNInference(imageFeed: Array<Array<FloatArray>>): Array<FloatArray> {
+        val lstmInitialState = cnnInterpreter.getOutputIndex("import/lstm/initial_state")
+        val stateFeed = Array(1) { FloatArray(LSTM_STATE_SIZE) }
+        //Run CNN to get image features initial state
+        val outputsCnn = hashMapOf<Int, Any>(lstmInitialState to stateFeed)
+        cnnInterpreter.runForMultipleInputsOutputs(arrayOf(imageFeed), outputsCnn)
+        return stateFeed
     }
 
-    private fun generateCaptionText(outputsLstm: HashMap<Int, Any>): String {
+    private fun generateCaptionText(stateFeed: Array<FloatArray>): String {
+        val softmax = Array(1) { FloatArray(VOCABULARY_SIZE) }
+        val lstmState = Array(1) { FloatArray(LSTM_STATE_SIZE) }
+        //Setup LSTM outputs
+        val outputsLstm = hashMapOf<Int, Any>(
+            lstmInterpreter.getOutputIndex("import/softmax") to softmax,
+            lstmInterpreter.getOutputIndex("import/lstm/state") to lstmState
+        )
         val words = mutableListOf<Int>()
-
-        (0 until MAX_CAPTION_LENGTH).forEach { i ->
+        val inputFeed = Array(1) { LongArray(1) }
+        repeat(MAX_CAPTION_LENGTH) {
             lstmInterpreter.runForMultipleInputsOutputs(arrayOf(inputFeed, stateFeed), outputsLstm)
             val maxId = softmax[0].findMaxId()
-
-            if (maxId == vocabulary.getClosingTagWordIndex()) {
-                return buildCaption(words.toList())
-            }
-
+            if (maxId == vocabulary.getClosingTagWordIndex()) return buildCaption(words.toList())
             words.add(maxId)
-
             inputFeed[0][0] = maxId.toLong()
-            System.arraycopy(lstmState[0], 0, stateFeed[0], 0, stateFeed[0].size)
+            stateFeed[0] = lstmState[0].copyOf()
         }
-
         return buildCaption(words.toList())
     }
 
