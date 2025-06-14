@@ -23,7 +23,7 @@ class LlmDescriptor @Inject constructor(
     private lateinit var llmInference: LlmInference
     private lateinit var llmInferenceSession: LlmInferenceSession
 
-    fun generateResponseAsync(
+    fun generateLlmDescription(
         prompt: String,
         progressListener: ProgressListener<String>
     ): ListenableFuture<String> {

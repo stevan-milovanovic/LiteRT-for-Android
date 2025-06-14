@@ -77,7 +77,7 @@ class MainViewModel @Inject constructor(
                 "Give description right away."
         var response = ""
         _generatedDescriptionIsLoading.value = true
-        llmInferenceModel.generateResponseAsync(question) { partialResult, done ->
+        llmInferenceModel.generateLlmDescription(question) { partialResult, done ->
             response += partialResult
             _generatedDescription.value = response
             _generatedDescriptionIsLoading.value = !done
